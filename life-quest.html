@@ -1555,6 +1555,12 @@ if(results.length){
   msg = `${g.name} 使用,${msg}`;
 }
 showToast(msg);
+// exp 增加后检查升级(useGoods 是除 action 完成外唯一会加 exp 的路径,需独立触发)
+const newLevel = getLevelFromExp(STATE.character.exp||0);
+if(newLevel > (STATE.character.level||1)){
+  STATE.character.level = newLevel;
+  showToast(`🎉 升级到 Lv.${newLevel}!`, 'success', 3500);
+}
 saveState();closeSheet();openSheet('bag');renderMain();renderTopbar();
 };
 window.dropGoods=function(id){
