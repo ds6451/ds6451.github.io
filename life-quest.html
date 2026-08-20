@@ -558,13 +558,28 @@ return null;
 }
 
 function getLevelFromExp(exp){
+// exp_table.exp_required 是"升到下一级所需 exp"(增量);
+// 说明字段的"累计" = 从 Lv.1 累计到当前 level 的 exp 之和。
+// 算法: 累加每级所需 exp,找最大累计阈值 ≤ exp 的 level。
 const t=CONFIG.exp_table;
-for(let i=t.length-1;i>=0;i--){if(exp>=t[i].exp_required) return t[i].level}
-return 1;
+let acc=0, lv=1;
+for(const row of t){
+  acc += row.exp_required;
+  if(exp < acc) return lv;
+  lv = row.level + 1;
+}
+return lv;
 }
 function getExpToNextLevel(){
-const next=CONFIG.exp_table.find(e=>e.level===STATE.character.level+1);
-return next?next.exp_required-STATE.character.exp:0;
+// 累计累加到当前 level+1 的总阈值, 减去当前 exp
+const lv=STATE.character.level||1;
+const t=CONFIG.exp_table;
+let acc=0;
+for(const row of t){
+  acc += row.exp_required;
+  if(row.level === lv) return Math.max(0, acc - (STATE.character.exp||0));
+}
+return 0;
 }
 function getExpProgress(){
 const lv=STATE.character.level;
