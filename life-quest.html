@@ -237,17 +237,17 @@ body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M12 7l5 5-5 5-5-5z"/></svg>
 <div>行动</div>
 </button>
-<button class="tab-btn" data-tab="character" onclick="switchTab('character')">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2"/></svg>
-<div>角色</div>
+<button class="tab-btn" data-tab="log" onclick="switchTab('log')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16v14H4zM8 2v4M16 2v4M4 10h16"/></svg>
+<div>日志</div>
 </button>
 <button class="tab-btn" data-tab="shop" onclick="switchTab('shop')">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l1-5h16l1 5M5 9v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M9 13h6"/></svg>
 <div>商店</div>
 </button>
-<button class="tab-btn" data-tab="log" onclick="switchTab('log')">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16v14H4zM8 2v4M16 2v4M4 10h16"/></svg>
-<div>日志</div>
+<button class="tab-btn" data-tab="character" onclick="switchTab('character')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2"/></svg>
+<div>角色</div>
 </button>
 </nav>
 <div class="onboarding-overlay hidden" id="onboardingOverlay"></div>
@@ -1480,20 +1480,55 @@ showToast('location 通过等级解锁');return;
 saveState();closeSheet();renderMain();renderTopbar();
 };
 window.useGoods=function(id){
-const qty=STATE.character.inventory.goods[id]||0;
-if(qty<=0) return;
-const g=CONFIG.goods.find(x=>x.id===id);
-if(!g) return;
-STATE.character.inventory.goods[id]--;
-const stat=g.effect_target||'body';
-STATE.character.stats.current[stat]=Math.min(STATE.character.attrs[stat], STATE.character.stats.current[stat]+(g.effect_value||5));
-showToast(`${g.name} 使用,${stat} +${g.effect_value||5}`);
-saveState();closeSheet();openSheet('bag');renderMain();renderTopbar();
+  const qty=STATE.character.inventory.goods[id]||0;
+  if(qty<=0) return;
+  const g=CONFIG.goods.find(x=>x.id===id);
+  if(!g) return;
+  const val=Number(g.effect_value)||0;
+  STATE.character.inventory.goods[id]--;
+  if(STATE.character.inventory.goods[id]<=0) delete STATE.character.inventory.goods[id];
+  // 按 effect_type 分支(原代码硬编码 body +N,与配置 desc 完全不符)
+  let msg='';
+  switch(g.effect_type){
+    case 'stat_max_add':{
+      // 恢复 current:目标属性优先读 g.stat,默认 body
+      const stat=g.stat||'body';
+      const max=STATE.character.attrs[stat]||0;
+      STATE.character.stats.current[stat]=Math.min(max, (STATE.character.stats.current[stat]||0)+val);
+      msg=`${g.name} 使用,${stat} 恢复 +${val}`;
+      break;
+    }
+    case 'exp_add':{
+      STATE.character.exp=(STATE.character.exp||0)+val;
+      msg=`${g.name} 使用,exp +${val}`;
+      break;
+    }
+    case 'coin_add':{
+      STATE.character.coin=(STATE.character.coin||0)+val;
+      msg=`${g.name} 使用,coin +${val}`;
+      break;
+    }
+    default:{
+      // 兜底:旧字段 effect_target(向下兼容一次性脏数据)
+      const stat=g.effect_target||'body';
+      const max=STATE.character.attrs[stat]||0;
+      STATE.character.stats.current[stat]=Math.min(max, (STATE.character.stats.current[stat]||0)+val);
+      msg=`${g.name} 使用,${stat} +${val}`;
+    }
+  }
+  showToast(msg);
+  saveState();closeSheet();openSheet('bag');renderMain();renderTopbar();
 };
 window.dropGoods=function(id){
-if(!confirm(`确认丢弃 ${CONFIG.goods.find(g=>g.id===id).name}?`)) return;
-STATE.character.inventory.goods[id]=0;
-closeSheet();openSheet('bag');renderMain();renderTopbar();
+  const g=CONFIG.goods.find(x=>x.id===id);
+  if(!g) return;
+  const qty=STATE.character.inventory.goods[id]||0;
+  if(qty<=0) return;
+  if(!confirm(`确认丢弃 1 个 ${g.name}?(剩余 ${qty-1} 个)`)) return;
+  STATE.character.inventory.goods[id]=qty-1;
+  if(STATE.character.inventory.goods[id]<=0) delete STATE.character.inventory.goods[id];
+  showToast(`已丢弃 1 个 ${g.name}`);
+  saveState();closeSheet();openSheet('bag');renderMain();renderTopbar();
 };
 window.kickTeammate=function(idx){
 const m=STATE.team[idx];
