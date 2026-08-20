@@ -1263,19 +1263,27 @@ window.sleepAction=function(){
 const recovery = getConst('sleep_recovery_per_attr') || 3;
 const attrs=STATE.character.stats.current;
 const max=STATE.character.attrs;
+// v2: 遍历角色 tags 的 effects,计算 sleep_recovery_mult 总倍率(替代硬编码 t35)
+let mult = 1;
+(STATE.character.tags||[]).forEach(tid=>{
+  const t=CONFIG.tags.find(x=>x.id===tid);
+  if(!t || !Array.isArray(t.effects)) return;
+  t.effects.forEach(e=>{
+    if(e.type === 'passive_sleep_recovery_mult') mult *= (Number(e.value)||1);
+  });
+});
 const log=[];
 ['body','mind','soul','will'].forEach(k=>{
 const m=max[k]||0;
 const before=attrs[k]||0;
-let delta=recovery;
-if(STATE.character.tags && STATE.character.tags.includes('t35')) delta=Math.floor(delta*0.5);
+let delta = Math.floor(recovery * mult);  // 倍率乘算后向下取整(与 t35 ×0.5 → 1 一致)
 const after=Math.min(m, before+delta);
 attrs[k]=after;
 log.push(`${k} ${before}→${after}`);
 });
 try { autoConsumeGoods(); } catch(e) { console.error(e); }
 saveState();
-showToast('😴 睡醒啦: '+log.join(' / '), 'success', 3500);
+showToast('😴 睡醒啦: '+log.join(' / ')+ (mult<1?` (睡眠恢复×${mult})`:''), 'success', 3500);
 renderMain();renderTopbar();
 };
 
@@ -1559,7 +1567,18 @@ const inv=STATE.character.inventory.goods;
 const items=Object.entries(inv).filter(([id,qty])=>qty>0);
 root.innerHTML=`<div class="sheet-overlay" onclick="if(event.target===this) closeSheet()"><div class="sheet"><button class="sheet-close" onclick="closeSheet()">×</button><div class="sheet-name" style="margin-bottom:14px">🎒 背包</div>${items.length===0?'<div class="card" style="text-align:center;padding:24px;color:var(--parchment-dark)">背包空空如也<br><br><button class="btn btn-primary" onclick="closeSheet();switchTab(\&apos;shop\&apos;)">去商店看看 →</button></div>':items.map(([id,qty])=>{const g=CONFIG.goods.find(x=>x.id===id);if(!g) return '';return `<div class="bag-card"><div class="bag-icon">${g.iconSvg||'📦'}</div><div class="bag-info"><div class="bag-name">${g.name} x${qty}</div><div class="bag-desc">${g.desc||''}</div></div><div class="bag-actions"><button class="btn btn-sm btn-primary" onclick="useGoods('${id}')">使用</button><button class="btn btn-sm btn-ghost" onclick="dropGoods('${id}')">丢弃</button></div></div>`;}).join('')}</div></div>`;
 } else if(type==='settings'){
-root.innerHTML=`<div class="sheet-overlay" onclick="if(event.target===this) closeSheet()"><div class="sheet"><button class="sheet-close" onclick="closeSheet()">×</button><div class="sheet-name" style="margin-bottom:14px">⚙️ 设置</div><div class="card"><div style="margin-bottom:6px">ℹ️ 关于</div><div style="font-size:12px;color:var(--parchment-dark)">生活冒险台 v${VERSION}<br>一个人安静地做另一个自己</div></div><div class="card"><button class="btn btn-block" onclick="exportData()">📥 导出角色卡(JSON)</button></div><div class="card"><button class="btn btn-block" onclick="importDataPrompt()">📤 导入角色卡</button></div><div class="card"><button class="btn btn-block btn-danger" onclick="clearDataPrompt()">⚠️ 清除本地数据</button></div></div></div>`;
+// 版本信息: 配置版本来自 CONFIG._meta.version(热更新后为远程版本); SW 版本 fetch 同源 sw.js 解析 VERSION
+const cfgVer = (CONFIG._meta && CONFIG._meta.version) || '内嵌';
+root.innerHTML=`<div class="sheet-overlay" onclick="if(event.target===this) closeSheet()"><div class="sheet"><button class="sheet-close" onclick="closeSheet()">×</button><div class="sheet-name" style="margin-bottom:14px">⚙️ 设置</div><div class="card"><div style="margin-bottom:6px">📦 版本</div><div style="font-size:12px;color:var(--parchment-dark)">配置版本: <b style="color:var(--gold-light)">${cfgVer}</b><br>SW 版本: <b style="color:var(--gold-light)" id="swVerText">…</b></div></div><div class="card"><div style="margin-bottom:6px">ℹ️ 关于</div><div style="font-size:12px;color:var(--parchment-dark)">生活冒险台 v${VERSION}<br>一个人安静地做另一个自己</div></div><div class="card"><button class="btn btn-block" onclick="exportData()">📥 导出角色卡(JSON)</button></div><div class="card"><button class="btn btn-block" onclick="importDataPrompt()">📤 导入角色卡</button></div><div class="card"><button class="btn btn-block btn-danger" onclick="clearDataPrompt()">⚠️ 清除本地数据</button></div></div></div>`;
+// 异步读取 sw.js 的 VERSION(网络优先,展示服务器当前版本;失败显示提示)
+fetch('sw.js?_='+Date.now(), {cache:'no-store'})
+  .then(r=>{ if(!r.ok) throw new Error(r.status); return r.text(); })
+  .then(t=>{
+    const m = t.match(/VERSION\s*=\s*'([^']+)'/);
+    const el = document.getElementById('swVerText');
+    if(el) el.textContent = m ? m[1] : '(未注入)';
+  })
+  .catch(()=>{ const el=document.getElementById('swVerText'); if(el) el.textContent='(离线)'; });
 } else if(type==='addTeammate'){
 root.innerHTML=`<div class="sheet-overlay" onclick="if(event.target===this) closeSheet()"><div class="sheet"><button class="sheet-close" onclick="closeSheet()">×</button><div class="sheet-name" style="margin-bottom:14px">导入队员</div><div class="card"><textarea class="text-input" id="importJson" placeholder="粘贴队友的角色卡 JSON..." rows="6" style="font-family:monospace;font-size:11px"></textarea><button class="btn btn-primary btn-block" style="margin-top:10px" onclick="importTeamFromSheet()">验证并导入</button></div>${STATE.team.length>=3?'<div class="card" style="border-color:var(--danger);color:var(--danger-light);font-size:12px">⚠️ 队伍已满,导入新队员需要先踢出旧队员</div>':''}</div></div>`;
 } else if(type==='teammate'){
