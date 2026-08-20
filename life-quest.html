@@ -1694,7 +1694,22 @@ init();
   // --- 1. Service Worker 注册(仅 HTTPS / localhost 有效) ---
   if('serviceWorker' in navigator && location.protocol !== 'file:'){
     window.addEventListener('load', function(){
-      navigator.serviceWorker.register('sw.js').catch(function(err){
+      navigator.serviceWorker.register('sw.js').then(function(reg){
+        // --- 1.1 新 SW 就绪 → 提示刷新(HTML/缓存已更新,需重载生效) ---
+        reg.addEventListener('updatefound', function(){
+          var nw = reg.installing;
+          if(!nw) return;
+          nw.addEventListener('statechange', function(){
+            if(nw.state === 'installed' && navigator.serviceWorker.controller){
+              // 已有旧 SW 在控制页面,新 SW 已安装 → 提示刷新
+              if(window.showToast){
+                showToast('✨ 检测到新版本,正在刷新...', 'success', 2500);
+              }
+              setTimeout(function(){ window.location.reload(); }, 1500);
+            }
+          });
+        });
+      }).catch(function(err){
         console.warn('[pwa] SW 注册失败(忽略,不影响使用):', err);
       });
     });
