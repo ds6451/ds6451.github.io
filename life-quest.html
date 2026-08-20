@@ -697,6 +697,39 @@ case 'log': m.innerHTML=renderLogTab(); break;
 }
 
 /* ========== Tab 1: 行动 ========== */
+function isLocationUnlocked(loc){
+if(!loc) return false;
+// 1. 等级门槛
+if(STATE.character.level < (loc.unlock_level||1)) return false;
+// 2. tag 门槛: any_team_tag = 任一(角色自己或任一队友持有任一 tag 即可)
+const allHeldTags = [];
+if(STATE.character && Array.isArray(STATE.character.tags)) allHeldTags.push(...STATE.character.tags);
+(STATE.team||[]).forEach(m => { if(Array.isArray(m.tags)) allHeldTags.push(...m.tags); });
+// unlock_any_team_tag: 命中任一 tag 即可
+if(Array.isArray(loc.unlock_any_team_tag) && loc.unlock_any_team_tag.length){
+  const anyHit = loc.unlock_any_team_tag.some(t => allHeldTags.includes(t));
+  if(!anyHit) return false;
+}
+// unlock_all_team_tag: 全部 tag 都必须命中
+if(Array.isArray(loc.unlock_all_team_tag) && loc.unlock_all_team_tag.length){
+  const allHit = loc.unlock_all_team_tag.every(t => allHeldTags.includes(t));
+  if(!allHit) return false;
+}
+return true;
+}
+function getLocationUnlockHint(loc){
+const hints=[];
+if((loc.unlock_level||1)>1) hints.push(`Lv.${loc.unlock_level}`);
+if(Array.isArray(loc.unlock_any_team_tag) && loc.unlock_any_team_tag.length){
+  const names=loc.unlock_any_team_tag.map(t=>{const tag=CONFIG.tags.find(x=>x.id===t);return tag?tag.name:t}).join(' / ');
+  hints.push(`tag:${names}`);
+}
+if(Array.isArray(loc.unlock_all_team_tag) && loc.unlock_all_team_tag.length){
+  const names=loc.unlock_all_team_tag.map(t=>{const tag=CONFIG.tags.find(x=>x.id===t);return tag?tag.name:t}).join(' + ');
+  hints.push(`全部 tag:${names}`);
+}
+return hints.join(' · ')||'—';
+}
 function renderActionTab(){
 const html=[];
 const expToNext=getExpToNextLevel();
@@ -734,7 +767,7 @@ html.push(`<div class="card" style="text-align:center;padding:30px 16px"><div st
 html.push('<div class="section"><div class="section-title">地点</div>');
 let locShown=0;
 CONFIG.locations.forEach(loc=>{
-const isUnlocked=STATE.character.level>=loc.unlock_level;
+const isUnlocked=isLocationUnlocked(loc);  // v3: 等级 + tag 双门槛
 if(!isUnlocked) return;  // 未解锁地点不显示
 locShown++;
 const isOpen=STATE.folders[loc.id]||false;
@@ -829,6 +862,12 @@ return;
 const action=CONFIG.actions.find(a=>a.id===actionId);
 if(!action) return;
 if(STATE.character.level<action.unlock_level){showToast(`需要 Lv.${action.unlock_level} 才能解锁`);return}
+// v3 防御: action 所属 location 未解锁则禁止发起(UI 已隐藏, 防绕过)
+const locOfAction=CONFIG.locations.find(l => Array.isArray(l.action_group) && l.action_group.includes(actionId));
+if(locOfAction && !isLocationUnlocked(locOfAction)){
+  showToast(`地点 ${locOfAction.name} 未解锁:${getLocationUnlockHint(locOfAction)}`, 'warn');
+  return;
+}
 if(action.coin_cost>0 && STATE.character.coin<action.coin_cost){showToast(`金币不足,需要 ${action.coin_cost} 🪙`);return}
 // v3 start_condition 二次校验(防御性:UI 灰显可绕过)
 const cond=checkStartCondition(action);
