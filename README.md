@@ -13,30 +13,33 @@
 ## 推送到 GitHub Pages
 
 ```bash
-# 1. 本地组装（改完 xlsx 后重跑）
+# 1. 本地一键组装（改完 xlsx 后重跑）：
+#    xlsx → config.json + 同步重编译 HTML 内嵌 CONFIG → 复制静态文件
 python build/deploy_pwa.py
 
-# 2. 推送 deploy/ 到 GitHub Pages 分支
+# 2. 推送 deploy/ 到 GitHub
 cd deploy
-git init
 git add .
 git commit -m "deploy pwa"
-git remote add origin https://github.com/<user>/<repo>.git
-git push -u origin main
+git push
 
-# 3. GitHub 仓库 Settings → Pages → 部署分支选 main（或 gh-pages）
+# 3. 等待 Pages 自动重建（~30s）
 ```
 
-访问：`https://<user>.github.io/<repo>/life-quest.html`
+访问：`https://ds6451.github.io/`
 
 ## 配置热更新流程
 
 1. 改 `build/life-quest.xlsx`
-2. `python build/deploy_pwa.py` → 重新生成 config.json（版本号=文件 mtime）
+2. `python build/deploy_pwa.py` → 重新生成 config.json + 重编译 HTML（版本号 = xlsx 文件 mtime）
 3. 推送 deploy/
 4. 用户**联网打开 App** → 自动拉取新 config.json → 应用新配置 → 提示"配置已更新"
 
 离线/失败兜底：先用上次缓存的远程配置，无缓存则用内嵌配置。
+
+> **版本一致性保证**：`deploy_pwa.py` 生成 config.json 后会自动把同一份配置
+> 重新注入 HTML 内嵌 CONFIG（`make_meta` 单一来源），因此内嵌与远程
+> `_meta.version` 永远一致，不再出现占位符/假版本号。
 
 ## 手机安装
 
@@ -48,8 +51,9 @@ git push -u origin main
 
 | 脚本 | 作用 |
 |---|---|
-| `build/deploy_pwa.py` | 组装部署目录（xlsx → config.json + 复制静态文件） |
-| `build/export_config.py` | 仅生成远程 config.json |
+| `build/deploy_pwa.py` | **一键部署**（xlsx → config.json + HTML 内嵌重编译 + 复制静态文件） |
+| `build/export_config.py` | 仅生成远程 config.json（不碰 HTML） |
+| `build/build.py` | 老入口（xlsx → JSON / --compile-html 注入 HTML） |
 | `build/gen_icons.py` | 重新生成应用图标 |
 
 ## 开发测试
