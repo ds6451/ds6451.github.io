@@ -733,13 +733,6 @@ camStream=null;
 const v=document.getElementById('camVideo');
 if(v && !v.srcObject) v.style.display='block';
 };
-window.retakeAvatar=function(){
-currentSel.avatar=null;  // 清掉残留,避免误存上次照片
-const root=document.getElementById('sheetRoot');
-root.innerHTML=`<div class="sheet-overlay" onclick="if(event.target===this) closeSheet()"><div class="sheet"><button class="sheet-close" onclick="closeSheet()">×</button><div class="sheet-name" style="margin-bottom:14px">📷 头像</div><div class="cam-wrap" id="camWrap"><canvas id="camCanvas" class="avatar-placeholder" style="width:100%;height:220px;display:none"></canvas><video id="camVideo" autoplay playsinline muted style="width:100%;height:220px;object-fit:cover"></video></div><button class="cam-btn" id="camBtn" onclick="toggleCamera()">📷 打开摄像头</button><div class="cam-hint" id="camHint">照片只存本机,不上传;不拍照则用名字首字头像</div><button class="btn btn-primary btn-block" style="margin-top:6px" onclick="saveAvatarFromSheet()">保存</button></div></div>`;
-camStream=null;
-initCameraPreview();
-};
 window.saveAvatarFromSheet=function(){
 if(currentSel && currentSel.avatar){
 STATE.character.avatar=currentSel.avatar;
@@ -751,6 +744,33 @@ showToast('未拍照,保持原头像');
 }
 stopCamera();
 closeSheet();
+};
+/* ========== 头像管理面板(角色tab 点击大头像) ========== */
+window.openAvatarSheet=function(){
+currentSel.avatar=null;  // 清残留
+stopCamera();
+const root=document.getElementById('sheetRoot');
+const c=STATE.character;
+const hasAvatar=!!(c && c.avatar);
+root.innerHTML=`<div class="sheet-overlay" onclick="if(event.target===this) closeSheet()"><div class="sheet"><button class="sheet-close" onclick="closeSheet()">×</button><div class="sheet-name" style="margin-bottom:14px">📷 头像</div><div class="sheet-icon" style="width:96px;height:96px;border-radius:50%;overflow:hidden;border:2px solid var(--gold-dark)">${avatarHtml(c,'avatar-img avatar-img-lg')}</div><div id="camBlock" style="display:none;margin-top:10px"><div class="cam-wrap" id="camWrap"><canvas id="camCanvas" class="avatar-placeholder" style="width:100%;height:220px;display:none"></canvas><video id="camVideo" autoplay playsinline muted style="width:100%;height:220px;object-fit:cover"></video></div><button class="cam-btn" id="camBtn" onclick="toggleCamera()">📷 打开摄像头</button><div class="cam-hint">照片只存本机,不上传;重拍完成后点「保存」</div></div><div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-block" onclick="editAvatarFromSheet()">📷 ${hasAvatar?'重拍':'拍照'}</button>${hasAvatar?'<button class="btn btn-block btn-danger" onclick="deleteAvatarFromSheet()">🗑 删除</button>':''}<button class="btn btn-primary btn-block" onclick="saveAvatarFromSheet()">保存</button></div></div></div>`;
+};
+window.editAvatarFromSheet=function(){
+const block=document.getElementById('camBlock');
+if(block) block.style.display='block';
+camStream=null;
+initCameraPreview();
+const btn=document.getElementById('camBtn');
+if(btn) btn.textContent='📷 打开摄像头';
+};
+window.deleteAvatarFromSheet=function(){
+if(!confirm('删除头像,恢复为默认首字头像?')) return;
+STATE.character.avatar=null;
+currentSel.avatar=null;
+saveState();
+renderMain();renderTopbar();
+stopCamera();
+closeSheet();
+showToast('头像已删除');
 };
 window.finishOnboarding=function(){
 if(!currentSel.mbti){showToast('请先选 MBTI');return}
@@ -1396,12 +1416,12 @@ const epHtml=ep.isMax
 ?`<div class="exp-progress max"><div class="exp-text">exp: MAX</div></div>`
 :`<div class="exp-progress"><div class="exp-text">exp: <span class="exp-now">${ep.current}</span> / ${ep.next}</div><div class="exp-bar"><div class="exp-bar-fill" style="width:${Math.round(ep.ratio*100)}%"></div></div></div>`;
 const html=[];
-html.push(`<div class="character-grid section"><div class="character-id"><div class="avatar avatar-lg" style="overflow:hidden">${avatarHtml(c,'avatar-img avatar-img-lg')}</div><div style="font-family:Georgia,serif;font-size:13px;color:var(--gold)">Lv.${c.level}</div>${epHtml}<div class="zodiac">${ZODIAC_SYMBOL[ZODIAC_LIST.indexOf(c.zodiac)]} ${c.zodiac}</div><div class="mbti">${c.mbti}</div></div><div class="attr-list">${renderAttrRow('⚔️','身体','body')}${renderAttrRow('🧠','心智','mind')}${renderAttrRow('💧','灵魂','soul')}${renderAttrRow('🔥','意志','will')}</div></div>`);
+html.push(`<div class="character-grid section"><div class="character-id"><div class="avatar avatar-lg" style="overflow:hidden;cursor:pointer" onclick="openAvatarSheet()" title="点击管理头像">${avatarHtml(c,'avatar-img avatar-img-lg')}</div><div style="font-family:Georgia,serif;font-size:13px;color:var(--gold)">Lv.${c.level}</div>${epHtml}<div class="zodiac">${ZODIAC_SYMBOL[ZODIAC_LIST.indexOf(c.zodiac)]} ${c.zodiac}</div><div class="mbti">${c.mbti}</div></div><div class="attr-list">${renderAttrRow('⚔️','身体','body')}${renderAttrRow('🧠','心智','mind')}${renderAttrRow('💧','灵魂','soul')}${renderAttrRow('🔥','意志','will')}</div></div>`);
 html.push('<div class="section"><div class="section-title">🏷️ Tags</div>');
 if(c.tags.length===0) html.push('<div class="card" style="text-align:center;padding:16px;color:var(--parchment-dark)">还没有 tag,去商店看看永久 tag?</div>');
 else {html.push('<div class="tags-wrap">'); c.tags.forEach(tid=>{const t=CONFIG.tags.find(x=>x.id===tid);if(t) html.push(`<div class="tag-card ${t.type==='debuff'?'debuff':''}" onclick="openTagDetail('${t.id}')"><span class="tag-id">${t.id}</span><span class="tag-name">${t.name}</span></div>`)}); html.push('</div>');}
 html.push('</div>');
-html.push(`<div class="grid-2x2"><div class="entry-card" onclick="sleepAction()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div class="label">睡觉</div><div class="meta">每属性 +${getConst('sleep_recovery_per_attr')||3}</div></div><div class="entry-card" onclick="openSheet('bag')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 8h14l-1 12H6L5 8zM8 8V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/></svg><div class="label">背包</div><div class="meta">${Object.values(c.inventory.goods).reduce((s,v)=>s+v,0)} 件</div></div><div class="entry-card" onclick="openSheet('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L16 3h-4l-.6 2.6a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2 1.2L10 21h4l.6-2.6a7 7 0 0 0 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/></svg><div class="label">设置</div></div><div class="entry-card" onclick="retakeAvatar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="label">头像</div><div class="meta">${c.avatar?'已拍照':'拍照设置'}</div></div></div><div class="section-title" style="margin-top:14px">👥 队伍</div><div class="team-grid">${renderTeamCell()}</div>`);
+html.push(`<div class="grid-2x2"><div class="entry-card" onclick="sleepAction()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div class="label">睡觉</div><div class="meta">每属性 +${getConst('sleep_recovery_per_attr')||3}</div></div><div class="entry-card" onclick="openSheet('bag')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 8h14l-1 12H6L5 8zM8 8V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/></svg><div class="label">背包</div><div class="meta">${Object.values(c.inventory.goods).reduce((s,v)=>s+v,0)} 件</div></div><div class="entry-card" onclick="openSheet('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L16 3h-4l-.6 2.6a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2 1.2L10 21h4l.6-2.6a7 7 0 0 0 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/></svg><div class="label">设置</div></div><div class="entry-card" onclick="openAvatarSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="label">头像</div><div class="meta">${c.avatar?'已拍照':'拍照设置'}</div></div></div><div class="section-title" style="margin-top:14px">👥 队伍</div><div class="team-grid">${renderTeamCell()}</div>`);
 return html.join('');
 }
 function renderAttrRow(icon, name, key){

@@ -7,7 +7,7 @@
  *   3. 更新策略:SW 文件版本号变化 → 浏览器安装新 SW → 主动接管
  * ============================================================ */
 
-const VERSION = '20260821.142748';  // deploy_pwa.py 部署时注入(xlsx mtime 时间戳,天然递增)
+const VERSION = '20260821.144539';  // deploy_pwa.py 部署时注入(xlsx mtime 时间戳,天然递增)
 const CACHE_NAME = 'life-quest-' + VERSION;
 
 // 预缓存清单(相对路径,与 start_url 同目录)
