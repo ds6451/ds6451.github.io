@@ -177,9 +177,9 @@ body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle
 .text-input{width:100%;padding:10px 12px;background:var(--brown-dark);border:1px solid var(--gold-dark);border-radius:6px;color:var(--text-light);font-size:15px;font-family:inherit}
 .text-input:focus{outline:none;border-color:var(--gold)}
 .onboarding-nav{display:flex;gap:8px;margin-top:14px}
-.cam-wrap{position:relative;border-radius:12px;overflow:hidden;background:var(--brown-dark);margin-bottom:12px}
-.cam-wrap video{width:100%;height:220px;object-fit:cover;display:block}
-.cam-wrap canvas{width:100%;height:220px;object-fit:cover;display:block}
+.cam-wrap{position:relative;border-radius:12px;overflow:hidden;background:var(--brown-dark);margin-bottom:12px;aspect-ratio:1/1;width:100%}
+.cam-wrap video{width:100%;height:100%;object-fit:cover;display:block}
+.cam-wrap canvas{width:100%;height:100%;object-fit:cover;display:block}
 .avatar-img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--gold-dark);flex-shrink:0}
 .avatar-img-lg{width:64px;height:64px;font-size:24px}
 .avatar-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:bold;color:var(--brown-dark)}
@@ -662,7 +662,7 @@ o.innerHTML=`<div class="onboarding-card"><div class="onboarding-title">选择�
 const def=CONFIG.character_defaults.find(c=>c.key==='default_nickname').value;
 o.innerHTML=`<div class="onboarding-card"><div class="onboarding-title">给角色起个名字</div><div class="onboarding-subtitle">名字只用于本地显示,可随时在角色 tab 修改</div><div class="input-group"><label class="input-label">角色名</label><input type="text" class="text-input" id="charNameInput" value="${def}" maxlength="20"></div><div class="onboarding-nav"><button class="btn btn-ghost" onclick="showOnboarding(2)">← 上一步</button><button class="btn btn-primary" onclick="nextOnboarding(4)">下一步 →</button></div></div>`;
 } else if(step===4){
-o.innerHTML=`<div class="onboarding-card"><div class="onboarding-title">拍一张头像</div><div class="onboarding-subtitle">可选 · 照片只存本机,可随时在角色页重拍</div><div class="cam-wrap" id="camWrap"><canvas id="camCanvas" class="avatar-placeholder" style="width:100%;height:220px;display:none"></canvas><video id="camVideo" autoplay playsinline muted style="width:100%;height:220px;object-fit:cover"></video></div><div id="camActions"><button class="cam-btn" id="camBtn" onclick="toggleCamera()">📷 打开摄像头</button></div><div class="cam-hint">无摄像头权限/拒绝时可直接跳过,使用名字首字头像</div><div class="onboarding-nav"><button class="btn btn-ghost" onclick="stopCamera();showOnboarding(3)">← 上一步</button><button class="btn btn-primary" onclick="finishOnboarding()">开始冒险 →</button></div></div>`;
+o.innerHTML=`<div class="onboarding-card"><div class="onboarding-title">拍一张头像</div><div class="onboarding-subtitle">可选 · 照片只存本机,可随时在角色页重拍</div><div class="cam-wrap" id="camWrap"><canvas id="camCanvas" class="avatar-placeholder" style="width:100%;height:100%;display:none"></canvas><video id="camVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover"></video></div><div id="camActions"><button class="cam-btn" id="camBtn" onclick="toggleCamera()">📷 打开摄像头</button></div><div class="cam-hint">无摄像头权限/拒绝时可直接跳过,使用名字首字头像</div><div class="onboarding-nav"><button class="btn btn-ghost" onclick="stopCamera();showOnboarding(3)">← 上一步</button><button class="btn btn-primary" onclick="finishOnboarding()">开始冒险 →</button></div></div>`;
 stopCamera();currentSel.avatar=null;initCameraPreview();
 }
 }
@@ -730,8 +730,10 @@ if(camStream){
 camStream.getTracks().forEach(t=>t.stop());
 camStream=null;
 }
+// 清空 srcObject:否则停掉的流会让 video 停留在最后一帧(静止画面,像载入了头像)
+// 注意: 不改 display(video/canvas 显隐由调用方控制,如 snapPhoto 拍照后显示 canvas)
 const v=document.getElementById('camVideo');
-if(v && !v.srcObject) v.style.display='block';
+if(v) v.srcObject=null;
 };
 window.saveAvatarFromSheet=function(){
 if(currentSel && currentSel.avatar){
@@ -752,12 +754,16 @@ stopCamera();
 const root=document.getElementById('sheetRoot');
 const c=STATE.character;
 const hasAvatar=!!(c && c.avatar);
-root.innerHTML=`<div class="sheet-overlay" onclick="if(event.target===this) closeSheet()"><div class="sheet"><button class="sheet-close" onclick="closeSheet()">×</button><div class="sheet-name" style="margin-bottom:14px">📷 头像</div><div class="sheet-icon" style="width:96px;height:96px;border-radius:50%;overflow:hidden;border:2px solid var(--gold-dark)">${avatarHtml(c,'avatar-img avatar-img-lg')}</div><div id="camBlock" style="display:none;margin-top:10px"><div class="cam-wrap" id="camWrap"><canvas id="camCanvas" class="avatar-placeholder" style="width:100%;height:220px;display:none"></canvas><video id="camVideo" autoplay playsinline muted style="width:100%;height:220px;object-fit:cover"></video></div><button class="cam-btn" id="camBtn" onclick="toggleCamera()">📷 打开摄像头</button><div class="cam-hint">照片只存本机,不上传;重拍完成后点「保存」</div></div><div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-block" onclick="editAvatarFromSheet()">📷 ${hasAvatar?'重拍':'拍照'}</button>${hasAvatar?'<button class="btn btn-block btn-danger" onclick="deleteAvatarFromSheet()">🗑 删除</button>':''}<button class="btn btn-primary btn-block" onclick="saveAvatarFromSheet()">保存</button></div></div></div>`;
+root.innerHTML=`<div class="sheet-overlay" onclick="if(event.target===this) closeSheet()"><div class="sheet"><button class="sheet-close" onclick="closeSheet()">×</button><div class="sheet-name" style="margin-bottom:14px">📷 头像</div><div class="sheet-icon" style="width:96px;height:96px;border-radius:50%;overflow:hidden;border:2px solid var(--gold-dark)">${avatarHtml(c,'avatar-img avatar-img-lg')}</div><div id="camBlock" style="display:none;margin-top:10px"><div class="cam-wrap" id="camWrap"><canvas id="camCanvas" class="avatar-placeholder" style="width:100%;height:100%;display:none"></canvas><video id="camVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover"></video></div><button class="cam-btn" id="camBtn" onclick="toggleCamera()">📷 打开摄像头</button><div class="cam-hint">照片只存本机,不上传;重拍完成后点「保存」</div></div><div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-block" onclick="editAvatarFromSheet()">📷 ${hasAvatar?'重拍':'拍照'}</button>${hasAvatar?'<button class="btn btn-block btn-danger" onclick="deleteAvatarFromSheet()">🗑 删除</button>':''}<button class="btn btn-primary btn-block" onclick="saveAvatarFromSheet()">保存</button></div></div></div>`;
 };
 window.editAvatarFromSheet=function(){
 const block=document.getElementById('camBlock');
 if(block) block.style.display='block';
 camStream=null;
+stopCamera();  // 清 srcObject,避免残留静止帧
+// 重置 canvas(清掉上次照片残留)
+const cv=document.getElementById('camCanvas');
+if(cv){ cv.style.display='none'; cv.getContext('2d').clearRect(0,0,cv.width||1,cv.height||1); }
 initCameraPreview();
 const btn=document.getElementById('camBtn');
 if(btn) btn.textContent='📷 打开摄像头';
