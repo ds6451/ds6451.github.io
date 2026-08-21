@@ -177,6 +177,15 @@ body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle
 .text-input{width:100%;padding:10px 12px;background:var(--brown-dark);border:1px solid var(--gold-dark);border-radius:6px;color:var(--text-light);font-size:15px;font-family:inherit}
 .text-input:focus{outline:none;border-color:var(--gold)}
 .onboarding-nav{display:flex;gap:8px;margin-top:14px}
+.cam-wrap{position:relative;border-radius:12px;overflow:hidden;background:var(--brown-dark);margin-bottom:12px}
+.cam-wrap video{width:100%;height:220px;object-fit:cover;display:block}
+.cam-wrap canvas{width:100%;height:220px;object-fit:cover;display:block}
+.avatar-img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--gold-dark);flex-shrink:0}
+.avatar-img-lg{width:64px;height:64px;font-size:24px}
+.avatar-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:bold;color:var(--brown-dark)}
+.cam-btn{width:100%;padding:10px;border-radius:8px;border:1px solid var(--gold);background:var(--brown-dark);color:var(--gold);font-size:14px;cursor:pointer;font-family:inherit;margin-bottom:8px}
+.cam-btn:hover{background:var(--gold);color:var(--brown-dark)}
+.cam-hint{text-align:center;color:var(--parchment-dark);font-size:11px;margin-bottom:10px}
 .sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:var(--brown-medium);border-top:2px solid var(--gold);border-radius:14px 14px 0 0;max-width:680px;width:100%;max-height:80vh;overflow-y:auto;padding:20px 16px calc(20px + env(safe-area-inset-bottom));position:relative}
 .sheet-close{position:absolute;top:12px;right:16px;background:transparent;border:none;color:var(--parchment);font-size:24px;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center}
@@ -651,20 +660,106 @@ o.innerHTML=`<div class="onboarding-card"><div class="onboarding-title">选择�
 o.innerHTML=`<div class="onboarding-card"><div class="onboarding-title">选择你的星座</div><div class="onboarding-subtitle">星座对应 +3/-1 净 +2 属性加成</div><div class="option-grid col-6">${ZODIAC_LIST.map((z,i)=>`<div class="option-cell zodiac-cell ${sel.zodiac===z?'selected':''}" onclick="selectZodiac('${z}')">${ZODIAC_SYMBOL[i]} ${z}</div>`).join('')}</div><div class="onboarding-nav"><button class="btn btn-ghost" onclick="showOnboarding(1)">← 上一步</button><button class="btn btn-primary" onclick="nextOnboarding(3)" ${sel.zodiac?'':'disabled style="opacity:.5"'}>下一步 →</button></div></div>`;
 } else if(step===3){
 const def=CONFIG.character_defaults.find(c=>c.key==='default_nickname').value;
-o.innerHTML=`<div class="onboarding-card"><div class="onboarding-title">给角色起个名字</div><div class="onboarding-subtitle">名字只用于本地显示,可随时在角色 tab 修改</div><div class="input-group"><label class="input-label">角色名</label><input type="text" class="text-input" id="charNameInput" value="${def}" maxlength="20"></div><div class="onboarding-nav"><button class="btn btn-ghost" onclick="showOnboarding(2)">← 上一步</button><button class="btn btn-primary" onclick="finishOnboarding()">开始冒险 →</button></div></div>`;
+o.innerHTML=`<div class="onboarding-card"><div class="onboarding-title">给角色起个名字</div><div class="onboarding-subtitle">名字只用于本地显示,可随时在角色 tab 修改</div><div class="input-group"><label class="input-label">角色名</label><input type="text" class="text-input" id="charNameInput" value="${def}" maxlength="20"></div><div class="onboarding-nav"><button class="btn btn-ghost" onclick="showOnboarding(2)">← 上一步</button><button class="btn btn-primary" onclick="nextOnboarding(4)">下一步 →</button></div></div>`;
+} else if(step===4){
+o.innerHTML=`<div class="onboarding-card"><div class="onboarding-title">拍一张头像</div><div class="onboarding-subtitle">可选 · 照片只存本机,可随时在角色页重拍</div><div class="cam-wrap" id="camWrap"><canvas id="camCanvas" class="avatar-placeholder" style="width:100%;height:220px;display:none"></canvas><video id="camVideo" autoplay playsinline muted style="width:100%;height:220px;object-fit:cover"></video></div><div id="camActions"><button class="cam-btn" id="camBtn" onclick="toggleCamera()">📷 打开摄像头</button></div><div class="cam-hint">无摄像头权限/拒绝时可直接跳过,使用名字首字头像</div><div class="onboarding-nav"><button class="btn btn-ghost" onclick="stopCamera();showOnboarding(3)">← 上一步</button><button class="btn btn-primary" onclick="finishOnboarding()">开始冒险 →</button></div></div>`;
+stopCamera();currentSel.avatar=null;initCameraPreview();
 }
 }
 window.selectMBTI=function(m){currentSel=currentSel||{};currentSel.mbti=m;showOnboarding(1, currentSel)};
 window.selectZodiac=function(z){currentSel=currentSel||{};currentSel.zodiac=z;showOnboarding(2, currentSel)};
 window.nextOnboarding=function(s){showOnboarding(s, currentSel||{})};
 var currentSel={};
+/* ========== 拍照头像(仅本地,不上传) ========== */
+var camStream=null;
+function initCameraPreview(){
+const v=document.getElementById('camVideo');
+if(v) v.style.display='block';
+const c=document.getElementById('camCanvas');
+if(c){c.style.display='none';}
+}
+window.toggleCamera=function(){
+const v=document.getElementById('camVideo');
+const btn=document.getElementById('camBtn');
+if(camStream){
+// 已开 → 拍照截帧
+snapPhoto();
+return;
+}
+if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+showToast('此设备不支持摄像头');return;
+}
+navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640}}, audio:false})
+.then(stream=>{
+camStream=stream;
+v.srcObject=stream;
+v.play().catch(()=>{});
+btn.textContent='📸 拍照';
+showToast('摄像头已打开,对准自己拍一张','success');
+})
+.catch(err=>{
+console.warn('[cam] 拒绝或失败:', err);
+showToast('无法打开摄像头(可能已拒绝权限),已跳过');
+stopCamera();
+});
+};
+function snapPhoto(){
+const v=document.getElementById('camVideo');
+const canvas=document.getElementById('camCanvas');
+if(!v||!canvas) return;
+const target=128;  // 头像小图,localStorage 友好
+const ratio=Math.min(target/v.videoWidth, target/v.videoHeight);
+const w=Math.round(v.videoWidth*ratio);
+const h=Math.round(v.videoHeight*ratio);
+canvas.width=w;canvas.height=h;
+const ctx=canvas.getContext('2d');
+ctx.drawImage(v,0,0,w,h);
+const dataUrl=canvas.toDataURL('image/jpeg',0.7);  // ~5-15KB,远小于 localStorage 5MB 上限
+currentSel.avatar=dataUrl;
+v.style.display='none';
+canvas.style.display='block';
+const btn=document.getElementById('camBtn');
+if(btn) btn.textContent='📷 重拍';
+const hint=document.querySelector('.cam-hint');
+if(hint) hint.textContent='✓ 已拍照,点「重拍」可再来一次;或直接「开始冒险」';
+stopCamera();
+showToast('照片已就位 ✓','success');
+}
+window.stopCamera=function(){
+if(camStream){
+camStream.getTracks().forEach(t=>t.stop());
+camStream=null;
+}
+const v=document.getElementById('camVideo');
+if(v && !v.srcObject) v.style.display='block';
+};
+window.retakeAvatar=function(){
+currentSel.avatar=null;  // 清掉残留,避免误存上次照片
+const root=document.getElementById('sheetRoot');
+root.innerHTML=`<div class="sheet-overlay" onclick="if(event.target===this) closeSheet()"><div class="sheet"><button class="sheet-close" onclick="closeSheet()">×</button><div class="sheet-name" style="margin-bottom:14px">📷 头像</div><div class="cam-wrap" id="camWrap"><canvas id="camCanvas" class="avatar-placeholder" style="width:100%;height:220px;display:none"></canvas><video id="camVideo" autoplay playsinline muted style="width:100%;height:220px;object-fit:cover"></video></div><button class="cam-btn" id="camBtn" onclick="toggleCamera()">📷 打开摄像头</button><div class="cam-hint" id="camHint">照片只存本机,不上传;不拍照则用名字首字头像</div><button class="btn btn-primary btn-block" style="margin-top:6px" onclick="saveAvatarFromSheet()">保存</button></div></div>`;
+camStream=null;
+initCameraPreview();
+};
+window.saveAvatarFromSheet=function(){
+if(currentSel && currentSel.avatar){
+STATE.character.avatar=currentSel.avatar;
+saveState();
+renderMain();renderTopbar();
+showToast('头像已更新 ✓','success');
+} else {
+showToast('未拍照,保持原头像');
+}
+stopCamera();
+closeSheet();
+};
 window.finishOnboarding=function(){
 if(!currentSel.mbti){showToast('请先选 MBTI');return}
 if(!currentSel.zodiac){showToast('请先选星座');return}
 const name=(document.getElementById('charNameInput').value||'冒险者').trim().slice(0,20);
 const attrs=calcInitialAttrs(currentSel.mbti, currentSel.zodiac);
-STATE.character={name, mbti:currentSel.mbti, zodiac:currentSel.zodiac, level:1, exp:0, coin:(getConst('default_initial_coin')||50), attrs:{...attrs}, stats:{current:{...attrs}}, tags:[], inventory:{goods:{}}};
+STATE.character={name, mbti:currentSel.mbti, zodiac:currentSel.zodiac, level:1, exp:0, coin:(getConst('default_initial_coin')||50), attrs:{...attrs}, stats:{current:{...attrs}}, tags:[], inventory:{goods:{}}, avatar:currentSel.avatar||null};
 STATE.currentAction=null;
+stopCamera();
 saveState();
 document.getElementById('onboardingOverlay').classList.add('hidden');
 switchTab('action');
@@ -673,9 +768,15 @@ showToast(`欢迎,${name}!`);
 };
 
 /* ========== 顶条 ========== */
+function avatarHtml(c, sizeCls){
+const cls=sizeCls||'avatar-img';
+if(c && c.avatar) return `<img class="${cls}" src="${c.avatar}" alt="头像">`;
+const ch=(c&&c.name&&c.name.charAt(0))||'?';
+return `<div class="${cls} avatar-placeholder" style="background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--brown-dark)">${ch}</div>`;
+}
 function renderTopbar(){
 if(!STATE.character) return;
-document.getElementById('topAvatar').textContent=STATE.character.name.charAt(0);
+document.getElementById('topAvatar').innerHTML=avatarHtml(STATE.character,'avatar-img');
 document.getElementById('topLevel').textContent='Lv.'+STATE.character.level;
 document.getElementById('topCoin').textContent=STATE.character.coin+' 🪙';
 }
@@ -1295,12 +1396,12 @@ const epHtml=ep.isMax
 ?`<div class="exp-progress max"><div class="exp-text">exp: MAX</div></div>`
 :`<div class="exp-progress"><div class="exp-text">exp: <span class="exp-now">${ep.current}</span> / ${ep.next}</div><div class="exp-bar"><div class="exp-bar-fill" style="width:${Math.round(ep.ratio*100)}%"></div></div></div>`;
 const html=[];
-html.push(`<div class="character-grid section"><div class="character-id"><div class="avatar avatar-lg">${c.name.charAt(0)}</div><div style="font-family:Georgia,serif;font-size:13px;color:var(--gold)">Lv.${c.level}</div>${epHtml}<div class="zodiac">${ZODIAC_SYMBOL[ZODIAC_LIST.indexOf(c.zodiac)]} ${c.zodiac}</div><div class="mbti">${c.mbti}</div></div><div class="attr-list">${renderAttrRow('⚔️','身体','body')}${renderAttrRow('🧠','心智','mind')}${renderAttrRow('💧','灵魂','soul')}${renderAttrRow('🔥','意志','will')}</div></div>`);
+html.push(`<div class="character-grid section"><div class="character-id"><div class="avatar avatar-lg" style="overflow:hidden">${avatarHtml(c,'avatar-img avatar-img-lg')}</div><div style="font-family:Georgia,serif;font-size:13px;color:var(--gold)">Lv.${c.level}</div>${epHtml}<div class="zodiac">${ZODIAC_SYMBOL[ZODIAC_LIST.indexOf(c.zodiac)]} ${c.zodiac}</div><div class="mbti">${c.mbti}</div></div><div class="attr-list">${renderAttrRow('⚔️','身体','body')}${renderAttrRow('🧠','心智','mind')}${renderAttrRow('💧','灵魂','soul')}${renderAttrRow('🔥','意志','will')}</div></div>`);
 html.push('<div class="section"><div class="section-title">🏷️ Tags</div>');
 if(c.tags.length===0) html.push('<div class="card" style="text-align:center;padding:16px;color:var(--parchment-dark)">还没有 tag,去商店看看永久 tag?</div>');
 else {html.push('<div class="tags-wrap">'); c.tags.forEach(tid=>{const t=CONFIG.tags.find(x=>x.id===tid);if(t) html.push(`<div class="tag-card ${t.type==='debuff'?'debuff':''}" onclick="openTagDetail('${t.id}')"><span class="tag-id">${t.id}</span><span class="tag-name">${t.name}</span></div>`)}); html.push('</div>');}
 html.push('</div>');
-html.push(`<div class="grid-2x2"><div class="entry-card" onclick="sleepAction()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div class="label">睡觉</div><div class="meta">每属性 +${getConst('sleep_recovery_per_attr')||3}</div></div><div class="entry-card" onclick="openSheet('bag')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 8h14l-1 12H6L5 8zM8 8V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/></svg><div class="label">背包</div><div class="meta">${Object.values(c.inventory.goods).reduce((s,v)=>s+v,0)} 件</div></div><div class="entry-card" onclick="openSheet('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L16 3h-4l-.6 2.6a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2 1.2L10 21h4l.6-2.6a7 7 0 0 0 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/></svg><div class="label">设置</div></div></div><div class="section-title" style="margin-top:14px">👥 队伍</div><div class="team-grid">${renderTeamCell()}</div>`);
+html.push(`<div class="grid-2x2"><div class="entry-card" onclick="sleepAction()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><div class="label">睡觉</div><div class="meta">每属性 +${getConst('sleep_recovery_per_attr')||3}</div></div><div class="entry-card" onclick="openSheet('bag')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 8h14l-1 12H6L5 8zM8 8V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/></svg><div class="label">背包</div><div class="meta">${Object.values(c.inventory.goods).reduce((s,v)=>s+v,0)} 件</div></div><div class="entry-card" onclick="openSheet('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L16 3h-4l-.6 2.6a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2 1.2L10 21h4l.6-2.6a7 7 0 0 0 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/></svg><div class="label">设置</div></div><div class="entry-card" onclick="retakeAvatar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="label">头像</div><div class="meta">${c.avatar?'已拍照':'拍照设置'}</div></div></div><div class="section-title" style="margin-top:14px">👥 队伍</div><div class="team-grid">${renderTeamCell()}</div>`);
 return html.join('');
 }
 function renderAttrRow(icon, name, key){
@@ -1311,7 +1412,7 @@ return `<div class="attr-row"><div class="attr-icon">${icon}</div><div class="at
 }
 function renderTeamCell(){
 const cells=[];
-cells.push(`<div class="team-cell" onclick="showToast('这是你')"><div class="avatar">${STATE.character.name.charAt(0)}</div><div class="name">${STATE.character.name}</div><div class="level">Lv.${STATE.character.level}</div></div>`);
+cells.push(`<div class="team-cell" onclick="showToast('这是你')"><div class="avatar" style="overflow:hidden">${avatarHtml(STATE.character,'avatar-img')}</div><div class="name">${STATE.character.name}</div><div class="level">Lv.${STATE.character.level}</div></div>`);
 for(let i=0;i<3;i++){
 const m=STATE.team[i];
 if(m) cells.push(`<div class="team-cell" onclick="openSheet('teammate',${i})"><div class="avatar">${m.name.charAt(0)}</div><div class="name">${m.name}</div><div class="level">Lv.${m.level}</div></div>`);
