@@ -692,6 +692,10 @@ showToast('此设备不支持摄像头');return;
 navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640}}, audio:false})
 .then(stream=>{
 camStream=stream;
+// 重拍场景: 拍照后 canvas 显示旧照片,重新打开时必须切回 video 预览
+const cv=document.getElementById('camCanvas');
+if(cv){ cv.style.display='none'; cv.getContext('2d').clearRect(0,0,cv.width||1,cv.height||1); }
+v.style.display='block';
 v.srcObject=stream;
 v.play().catch(()=>{});
 btn.textContent='📸 拍照';
