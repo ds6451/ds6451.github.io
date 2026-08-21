@@ -101,7 +101,8 @@
       "id": "t01",
       "name": "早起鸟",
       "desc": "早起相关加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": "6-9 点 will 检定 +2",
       "effects": [
@@ -121,7 +122,8 @@
       "id": "t02",
       "name": "夜猫子",
       "desc": "22 点后行动额外奖励",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": "22 点后 +1 exp",
       "effects": [
@@ -141,7 +143,8 @@
       "id": "t03",
       "name": "独行侠",
       "desc": "独自行动时奖励加成",
-      "type": "positive",
+      "category": "social.relation",
+      "mutex_group": "social.relation",
       "unlock_level": 1,
       "备注": "无队伍时 coin +3",
       "effects": [
@@ -156,7 +159,8 @@
       "id": "t04",
       "name": "社交达人",
       "desc": "有队伍时加成",
-      "type": "positive",
+      "category": "social.relation",
+      "mutex_group": "social.relation",
       "unlock_level": 1,
       "备注": "队伍≥2 检定 +1",
       "effects": [
@@ -176,7 +180,8 @@
       "id": "t05",
       "name": "细心",
       "desc": "关注细节,稳定输出",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": "任何挑战 +1 分",
       "effects": [
@@ -191,7 +196,8 @@
       "id": "t06",
       "name": "急性子",
       "desc": "短时间多次行动有加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": "30 分钟内每次 +1 exp",
       "effects": [
@@ -206,7 +212,8 @@
       "id": "t07",
       "name": "慢性子",
       "desc": "持续行动有奖励",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": "长行动 +2 coin",
       "effects": [
@@ -221,7 +228,8 @@
       "id": "t08",
       "name": "乐天派",
       "desc": "任何行动至少 +1 exp",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": null,
       "effects": [
@@ -236,7 +244,8 @@
       "id": "t09",
       "name": "完美主义",
       "desc": "高标准严要求",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": "挑战 +1 分,will 检定 +1",
       "effects": [
@@ -256,7 +265,8 @@
       "id": "t10",
       "name": "深度阅读者",
       "desc": "阅读挑战有加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 5,
       "备注": "mind 检定 +2,mind max +3",
       "effects": [
@@ -276,7 +286,8 @@
       "id": "t11",
       "name": "厨房艺术家",
       "desc": "厨房动作有加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": "soul max +3,行动 +2 coin",
       "effects": [
@@ -296,7 +307,8 @@
       "id": "t12",
       "name": "健身狂人",
       "desc": "健身挑战有加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": "body max +5,检定 +2",
       "effects": [
@@ -316,7 +328,8 @@
       "id": "t13",
       "name": "效率至上",
       "desc": "效率相关加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": "上午 +1 检定,+1 exp",
       "effects": [
@@ -336,7 +349,8 @@
       "id": "t14",
       "name": "慢生活家",
       "desc": "慢节奏行动加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": null,
       "effects": [
@@ -351,7 +365,8 @@
       "id": "t15",
       "name": "户外控",
       "desc": "户外行动加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 5,
       "备注": "户外挑战 body +2,will max +2",
       "effects": [
@@ -371,7 +386,8 @@
       "id": "t16",
       "name": "学习者",
       "desc": "学习类挑战加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": null,
       "effects": [
@@ -391,7 +407,8 @@
       "id": "t17",
       "name": "耐力强化",
       "desc": "长时间挑战有加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": null,
       "effects": [
@@ -406,7 +423,8 @@
       "id": "t18",
       "name": "专注护体",
       "desc": "专注类挑战有加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": null,
       "effects": [
@@ -426,7 +444,8 @@
       "id": "t19",
       "name": "幸运加成",
       "desc": "所有挑战 +1",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": null,
       "effects": [
@@ -441,7 +460,8 @@
       "id": "t20",
       "name": "沉稳",
       "desc": "5 级以上有加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 10,
       "备注": "5+ 检定 +1,will +1",
       "effects": [
@@ -461,7 +481,8 @@
       "id": "t21",
       "name": "行动派",
       "desc": "短时间行动有奖励",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": null,
       "effects": [
@@ -476,7 +497,8 @@
       "id": "t22",
       "name": "守护者",
       "desc": "队伍中贡献加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": "队伍≥2 +1 检定,+1 coin",
       "effects": [
@@ -496,7 +518,8 @@
       "id": "t23",
       "name": "计划者",
       "desc": "完成任务有奖励",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": null,
       "effects": [
@@ -516,7 +539,8 @@
       "id": "t24",
       "name": "耐力王",
       "desc": "长时间挑战有加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": null,
       "effects": [
@@ -536,7 +560,8 @@
       "id": "t25",
       "name": "心灵手巧",
       "desc": "手工类挑战加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 10,
       "备注": null,
       "effects": [
@@ -556,7 +581,8 @@
       "id": "t26",
       "name": "创造者",
       "desc": "创意类挑战加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": null,
       "effects": [
@@ -576,7 +602,8 @@
       "id": "t27",
       "name": "美食家",
       "desc": "饮食相关挑战加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": null,
       "effects": [
@@ -591,7 +618,8 @@
       "id": "t28",
       "name": "宅家不出门",
       "desc": "户外挑战有惩罚",
-      "type": "debuff",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": "户外挑战 body -2,max -3",
       "effects": [
@@ -611,7 +639,8 @@
       "id": "t29",
       "name": "拖延症",
       "desc": "决策有惩罚",
-      "type": "debuff",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": "任何挑战 -1 分",
       "effects": [
@@ -626,7 +655,8 @@
       "id": "t30",
       "name": "懒散",
       "desc": "行动效率降低",
-      "type": "debuff",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": "行动 -1 exp,will -1",
       "effects": [
@@ -646,7 +676,8 @@
       "id": "t31",
       "name": "腿部骨折",
       "desc": "腿部骨折,行动受限",
-      "type": "debuff",
+      "category": "physical.injury",
+      "mutex_group": "physical.injury",
       "unlock_level": 1,
       "备注": "由 a10/a11 失败获得,需 a09 骨科医院治疗",
       "effects": [
@@ -666,7 +697,8 @@
       "id": "t32",
       "name": "骨裂",
       "desc": "轻度骨裂,影响行动",
-      "type": "debuff",
+      "category": "physical.injury",
+      "mutex_group": "physical.injury",
       "unlock_level": 1,
       "备注": "由 a11/a13 失败获得,需 a09 治疗",
       "effects": [
@@ -681,7 +713,8 @@
       "id": "t33",
       "name": "腿部石膏",
       "desc": "骨科治疗中标记",
-      "type": "debuff",
+      "category": "physical.injury",
+      "mutex_group": "physical.injury",
       "unlock_level": 1,
       "备注": "骨科医院普通通过的中间状态,可被完美移除",
       "effects": [
@@ -696,7 +729,8 @@
       "id": "t34",
       "name": "轻度焦虑",
       "desc": "心理焦虑,睡眠受影响",
-      "type": "debuff",
+      "category": "mental.calm",
+      "mutex_group": "mental.calm",
       "unlock_level": 1,
       "备注": "可被 a08 心理咨询治疗",
       "effects": [
@@ -711,7 +745,8 @@
       "id": "t35",
       "name": "失眠诅咒",
       "desc": "睡眠恢复 -50%",
-      "type": "debuff",
+      "category": "physical.fatigue",
+      "mutex_group": "physical.fatigue",
       "unlock_level": 1,
       "备注": "可被 a12 补眠治疗",
       "effects": [
@@ -726,7 +761,8 @@
       "id": "t36",
       "name": "财务透支",
       "desc": "下一行动 coin -50%",
-      "type": "debuff",
+      "category": "resource.finance",
+      "mutex_group": "resource.finance",
       "unlock_level": 1,
       "备注": "由 a11 极限探险失败获得",
       "effects": [
@@ -741,7 +777,8 @@
       "id": "t37",
       "name": "探险家",
       "desc": "户外挑战加成",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 5,
       "备注": "由 a11 完美或 a13 部分情况获得",
       "effects": [
@@ -761,7 +798,8 @@
       "id": "t38",
       "name": "健美冠军",
       "desc": "健身达人的极致",
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 10,
       "备注": "由 a10 跑马拉松完美 50% 获得",
       "effects": [
@@ -781,7 +819,8 @@
       "id": "t39",
       "name": "自由职业者",
       "desc": null,
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": null,
       "effects": []
@@ -790,7 +829,8 @@
       "id": "t40",
       "name": "科研人员",
       "desc": null,
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
       "unlock_level": 1,
       "备注": null,
       "effects": []
@@ -799,7 +839,408 @@
       "id": "t41",
       "name": "学生",
       "desc": null,
-      "type": "positive",
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t42",
+      "name": "不良少女",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t43",
+      "name": "优等生",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t44",
+      "name": "体味",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t45",
+      "name": "信仰心",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t46",
+      "name": "同性恋",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t47",
+      "name": "外伤",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t48",
+      "name": "大小姐",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t49",
+      "name": "天赋",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t50",
+      "name": "实习生",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t51",
+      "name": "巨乳",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t52",
+      "name": "年过三十",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t53",
+      "name": "强势",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t54",
+      "name": "敏感",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t55",
+      "name": "有男友",
+      "desc": null,
+      "category": "social.relation",
+      "mutex_group": "social.partner",
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t56",
+      "name": "洁癖症",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t57",
+      "name": "混血儿",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t58",
+      "name": "温顺",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t59",
+      "name": "爱哭鬼",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t60",
+      "name": "爱打扮",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t61",
+      "name": "病弱",
+      "desc": null,
+      "category": "physical.health",
+      "mutex_group": "physical.health",
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t76",
+      "name": "穿环",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t77",
+      "name": "笨手笨脚",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t78",
+      "name": "纯真无暇",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t79",
+      "name": "绝望",
+      "desc": null,
+      "category": "emotional.mood",
+      "mutex_group": "emotional.mood",
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t62",
+      "name": "色色的",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t63",
+      "name": "贫乳",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t80",
+      "name": "轮椅",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t81",
+      "name": "体育生",
+      "desc": null,
+      "category": "neutral.trait",
+      "mutex_group": null,
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t64",
+      "name": "健康",
+      "desc": null,
+      "category": "physical.health",
+      "mutex_group": "physical.health",
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t65",
+      "name": "生病",
+      "desc": null,
+      "category": "physical.health",
+      "mutex_group": "physical.health",
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t66",
+      "name": "恢复中",
+      "desc": null,
+      "category": "physical.health",
+      "mutex_group": "physical.health",
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t67",
+      "name": "精力充沛",
+      "desc": null,
+      "category": "physical.fatigue",
+      "mutex_group": "physical.fatigue",
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t68",
+      "name": "疲劳",
+      "desc": null,
+      "category": "physical.fatigue",
+      "mutex_group": "physical.fatigue",
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t69",
+      "name": "专注",
+      "desc": null,
+      "category": "mental.attention",
+      "mutex_group": "mental.attention",
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t70",
+      "name": "分心",
+      "desc": null,
+      "category": "mental.attention",
+      "mutex_group": "mental.attention",
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t71",
+      "name": "平静",
+      "desc": null,
+      "category": "mental.calm",
+      "mutex_group": "mental.calm",
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t72",
+      "name": "开心",
+      "desc": null,
+      "category": "emotional.mood",
+      "mutex_group": "emotional.mood",
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t73",
+      "name": "沮丧",
+      "desc": null,
+      "category": "emotional.mood",
+      "mutex_group": "emotional.mood",
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t74",
+      "name": "振奋",
+      "desc": null,
+      "category": "emotional.mood",
+      "mutex_group": "emotional.mood",
+      "unlock_level": 1,
+      "备注": null,
+      "effects": []
+    },
+    {
+      "id": "t75",
+      "name": "财务稳定",
+      "desc": null,
+      "category": "resource.finance",
+      "mutex_group": "resource.finance",
       "unlock_level": 1,
       "备注": null,
       "effects": []
@@ -15733,8 +16174,8 @@
     }
   ],
   "_meta": {
-    "version": "20260820.132622",
-    "updatedAt": "2026-08-20 13:26:22",
+    "version": "20260821.181006",
+    "updatedAt": "2026-08-21 18:10:06",
     "source_file": "life-quest.xlsx",
     "sheet_count": 12
   }
